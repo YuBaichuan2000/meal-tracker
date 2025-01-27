@@ -9,15 +9,14 @@
 
 ## Tech Stack
 * Frontend: React, tailwind, vite
-* Backend: nodejs with Express, OAuth
+* Backend: nodejs with Express
 * Database: MySQL, Prisma
 
 
 ## Project Breakdown
 * Prototyping: wireframe
-* Database Design&Setup(https://dbdiagram.io/d/meal-tracker-DB-67972bbb263d6cf9a021a4e5):
-  User, Dish, Ingredient
-* Backend: basic CRUD, authentication
-* Frontend:
+* Database Design&Setup(https://dbdiagram.io/d/meal-tracker-DB-67972bbb263d6cf9a021a4e5)
+* Backend: basic CRUD
+* Frontend: tailwind
 * Testing: unit & integration
 * Deployment
