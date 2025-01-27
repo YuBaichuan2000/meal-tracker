@@ -1,0 +1,85 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// ----------------- Models ----------------- //
+model User {
+  user_id    Int      @id @default(autoincrement())
+  username   String
+  email      String   @unique
+  password   String
+  created_at DateTime @default(now())
+
+  menuItems  MenuItem[]
+}
+
+model Dish {
+  dish_id    Int      @id @default(autoincrement())
+  dish_name  String   @unique
+  created_at DateTime @default(now())
+
+  dishIngredients DishIngredients[]
+  menuItems       MenuItem[]
+}
+
+model Ingredients {
+  ingredient_id   Int      @id @default(autoincrement())
+  ingredient_name String   @unique
+  created_at      DateTime @default(now())
+
+  dishIngredients DishIngredients[]
+}
+
+model DishIngredients {
+  dish_id       Int
+  ingredient_id Int
+  unit          String?
+  created_at    DateTime @default(now())
+
+  // Composite ID
+  @@id([dish_id, ingredient_id])
+
+  // Relations
+  dish       Dish       @relation(fields: [dish_id], references: [dish_id])
+  ingredient Ingredients @relation(fields: [ingredient_id], references: [ingredient_id])
+}
+
+model MenuItem {
+  menu_item_id Int      @id @default(autoincrement())
+  user_id      Int
+  dish_id      Int
+  quantity     Float    @default(1)
+  label        Label?
+  day_of_week  DayOfWeek
+  created_at   DateTime @default(now())
+
+  user User @relation(fields: [user_id], references: [user_id])
+  dish Dish @relation(fields: [dish_id], references: [dish_id])
+}
+
+// ------------- Enums ------------- //
+enum Label {
+  Lunch
+  Dinner
+}
+
+enum DayOfWeek {
+  Monday
+  Tuesday
+  Wednesday
+  Thursday
+  Friday
+  Saturday
+  Sunday
+}
