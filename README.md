@@ -15,7 +15,7 @@
 
 ## Project Breakdown
 * Prototyping: wireframe
-* Database Design&Setup:
+* Database Design&Setup(https://dbdiagram.io/d/meal-tracker-DB-67972bbb263d6cf9a021a4e5):
   User, Dish, Ingredient
 * Backend: basic CRUD, authentication
 * Frontend:
