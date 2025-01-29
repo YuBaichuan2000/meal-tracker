@@ -8,7 +8,7 @@
 * As a user, I want to view a dashboard showing fav meal over the last week, last month, last quarter, etc.
 
 ## Tech Stack
-* Frontend: React, tailwind, vite
+* Frontend: React, tailwind, vite, shadcn
 * Backend: nodejs with Express
 * Database: MySQL, Prisma
 
@@ -17,6 +17,6 @@
 * Prototyping: wireframe
 * Database Design&Setup(https://dbdiagram.io/d/meal-tracker-DB-67972bbb263d6cf9a021a4e5)
 * Backend: basic CRUD
-* Frontend: tailwind
+* Frontend: shadcn
 * Testing: unit & integration
 * Deployment
