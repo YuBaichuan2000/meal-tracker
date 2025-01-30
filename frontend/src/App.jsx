@@ -1,16 +1,23 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
 import { Button } from "@/components/ui/button"
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Home from './pages/Home';
+import Menu from './pages/Menu';
+import DishForm from './pages/DishForm';
+import IngredientForm from './pages/IngredientForm';
+
 
 function App() {
-  const [count, setCount] = useState(0)
 
   return (
-    <>
-      <Button>Click me</Button>
-    </>
+    <Router>
+      <Routes>
+        <Route path='/' element={<Home/>}></Route>
+        <Route path='/menu' element={<Menu/>}></Route>
+        <Route path='/dish/new' element={<DishForm/>}></Route>
+        <Route path='/ingredient/new' element={<IngredientForm/>}></Route>
+      </Routes>
+    </Router>
   )
 }
 
