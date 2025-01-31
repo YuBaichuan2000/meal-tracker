@@ -1,23 +1,12 @@
-"use client"
-import {
-  useState
-} from "react"
-import {
-  toast
-} from "sonner"
-import {
-  useForm
-} from "react-hook-form"
-import {
-  zodResolver
-} from "@hookform/resolvers/zod"
-import * as z from "zod"
-import {
-  cn
-} from "@/lib/utils"
-import {
-  Button
-} from "@/components/ui/button"
+"use client";
+
+import React, { useState, useEffect } from "react";
+// import { toast } from "sonner";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -26,251 +15,200 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form"
-import {
-  Input
-} from "@/components/ui/input"
-import {
-  format
-} from "date-fns"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger
-} from "@/components/ui/popover"
-import {
-  Calendar
-} from "@/components/ui/calendar"
-import {
-  Calendar as CalendarIcon
-} from "lucide-react"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from "@/components/ui/select"
-import {
-  Slider
-} from "@/components/ui/slider"
+} from "@/components/ui/form";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
 
+// 1) Define your Zod schema for the form fields
 const formSchema = z.object({
-  name_8375402145: z.string(),
-  name_4895316374: z.coerce.date(),
-  : z.string(),
-  name_8947632444: z.string(),
-  name_5329758065: z.number()
+  dish_id: z.coerce.number().min(1, "Please select a valid dish"),
+  day_of_week: z.enum([
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+    "Sunday",
+  ]),
+  label: z.enum(["Breakfast", "Lunch", "Dinner"]),
+  quantity: z.coerce.number().min(1),
 });
 
 export default function MenuItemForm() {
+  const [dishes, setDishes] = useState([]);
 
-    const form = useForm < z.infer < typeof formSchema >> ({
-        resolver: zodResolver(formSchema),
-        defaultValues: {
-        "name_4895316374": new Date()
-        },
-    })
+  // 2) Create the React Hook Form instance, using Zod as a resolver
+  const form = useForm({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      dish_id: 0,
+      day_of_week: "Monday",
+      label: "Lunch",
+      quantity: 1,
+    },
+  });
 
-    const [dishId, setDishId] = useState('');
-    const [dishes, setDishes] = useState([]);
-    const [dayOfWeek, setDayOfWeek] = useState('Monday');
-    const [label, setLabel] = useState('Lunch');
-    const [quantity, setQuantity] = useState(1);
+  // 3) Fetch the list of dishes on mount (for the dropdown)
+  useEffect(() => {
+    async function fetchDishes() {
+      try {
+        const res = await fetch("/api/dish");
+        const data = await res.json();
+        setDishes(data);
+      } catch (error) {
+        console.error("Error fetching dishes:", error);
+      }
+    }
+    fetchDishes();
+  }, []);
 
-    
-
-    useEffect(() => {
-        const fetchDishes = async () => {
-            try {
-                const res = await fetch('/api/dish');
-                const data = await res.json();
-                setDishes(data);
-            } catch (e) {
-                console.log('Error fetching dishes: ', error);
-            }
-        };
-        fetchDishes();
-    }, []);
-
-    const handleSubmit = async (event) => {
-        event.preventDefault();
-
-        try {
-            const body = { user_id: 1, dish_id: parseInt(dishId), quantity, label, day_of_week: dayOfWeek };
-            const res = await fetch('/api/menu', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(body)
-            });
-            if (res.ok) {
-                setDishId('');
-                setQuantity(1);
-                setLabel('Lunch');
-                setDayOfWeek('Monday');
-                alert('Menu item created successfully');
-            } else {
-                console.error('Error creating menu item');
-            }
-        } catch (error) {
-            console.error('Error:', error);
-        };
-    };
-
-  function onSubmit(values: z.infer < typeof formSchema > ) {
+  // 4) Submission handler (Zod validation + async fetch to create menu item)
+  async function onSubmit(values) {
     try {
-      console.log(values);
-      toast(
-        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-          <code className="text-white">{JSON.stringify(values, null, 2)}</code>
-        </pre>
-      );
+      console.log("Form values:", values);
+      const body = {
+        user_id: 1, // or get from context if you have auth
+        dish_id: values.dish_id,
+        day_of_week: values.day_of_week,
+        label: values.label,
+        quantity: values.quantity,
+      };
+
+      const res = await fetch("/api/menu", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+
+      if (res.ok) {
+        toast.success("Menu item created successfully");
+        // reset form to defaults
+        form.reset();
+      } else {
+        toast.error("Error creating menu item");
+      }
     } catch (error) {
-      console.error("Form submission error", error);
-      toast.error("Failed to submit the form. Please try again.");
+      console.error("Error:", error);
+      toast.error("Failed to submit. Please try again.");
     }
   }
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 max-w-3xl mx-auto py-10">
-        
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="space-y-8 max-w-2xl mx-auto py-6"
+      >
+        <h2 className="text-xl font-bold">Create Menu Item</h2>
+
+        {/* Dish Field */}
         <FormField
           control={form.control}
-          name="name_8375402145"
+          name="dish_id"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Username</FormLabel>
+              <FormLabel>Select Dish</FormLabel>
               <FormControl>
-                <Input 
-                placeholder="shadcn"
-                
-                type=""
-                {...field} />
-              </FormControl>
-              <FormDescription>This is your public display name.</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
-      <FormField
-      control={form.control}
-      name="name_4895316374"
-      render={({ field }) => (
-        <FormItem className="flex flex-col">
-          <FormLabel>Date of birth</FormLabel>
-          <Popover>
-            <PopoverTrigger asChild>
-              <FormControl>
-                <Button
-                  variant={"outline"}
-                  className={cn(
-                    "w-[240px] pl-3 text-left font-normal",
-                    !field.value && "text-muted-foreground"
-                  )}
+                <Select
+                  onValueChange={(val) => field.onChange(Number(val))}
+                  value={String(field.value)}
                 >
-                  {field.value ? (
-                    format(field.value, "PPP")
-                  ) : (
-                    <span>Pick a date</span>
-                  )}
-                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                </Button>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Pick a dish" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {dishes.map((dish) => (
+                      <SelectItem key={dish.dish_id} value={String(dish.dish_id)}>
+                        {dish.dish_name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </FormControl>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-              <Calendar
-                mode="single"
-                selected={field.value}
-                onSelect={field.onChange}
-                initialFocus
-              />
-            </PopoverContent>
-          </Popover>
-       <FormDescription>Your date of birth is used to calculate your age.</FormDescription>
-          <FormMessage />
-        </FormItem>
-      )}
-    />
-        
-        <FormField
-          control={form.control}
-          name=""
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Email</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a verified email to display" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="m@example.com">m@example.com</SelectItem>
-                  <SelectItem value="m@google.com">m@google.com</SelectItem>
-                  <SelectItem value="m@support.com">m@support.com</SelectItem>
-                </SelectContent>
-              </Select>
-                <FormDescription>You can manage email addresses in your email settings.</FormDescription>
+              <FormDescription>Choose an existing dish.</FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
-        
+
+        {/* Day of Week Field */}
         <FormField
           control={form.control}
-          name="name_8947632444"
+          name="day_of_week"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
+              <FormLabel>Day of Week</FormLabel>
+              <FormControl>
+                <Select onValueChange={field.onChange} value={field.value}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select a verified email to display" />
+                    <SelectValue placeholder="Select day" />
                   </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="m@example.com">m@example.com</SelectItem>
-                  <SelectItem value="m@google.com">m@google.com</SelectItem>
-                  <SelectItem value="m@support.com">m@support.com</SelectItem>
-                </SelectContent>
-              </Select>
-                <FormDescription>You can manage email addresses in your email settings.</FormDescription>
+                  <SelectContent>
+                    {["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"].map((day) => (
+                      <SelectItem key={day} value={day}>
+                        {day}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </FormControl>
+              <FormDescription>Which day is this dish for?</FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
-        
-            <FormField
-              control={form.control}
-              name="name_5329758065"
-              render={({ field: { value, onChange } }) => (
-              <FormItem>
-                <FormLabel>Price - {value}</FormLabel>
-                <FormControl>
-                  <Slider
-                    min={0}
-                    max={100}
-                    step={5}
-                    defaultValue={[5]}
-                    onValueChange={(vals) => {
-                      onChange(vals[0]);
-                    }}
-                  />
-                </FormControl>
-                <FormDescription>Adjust the price by sliding.</FormDescription>
-                <FormMessage />
-              </FormItem>
-              )}
-            />
+
+        {/* Label Field (Breakfast, Lunch, Dinner) */}
+        <FormField
+          control={form.control}
+          name="label"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Meal Label</FormLabel>
+              <FormControl>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select meal label" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Breakfast">Breakfast</SelectItem>
+                    <SelectItem value="Lunch">Lunch</SelectItem>
+                    <SelectItem value="Dinner">Dinner</SelectItem>
+                  </SelectContent>
+                </Select>
+              </FormControl>
+              <FormDescription>Which meal is this dish for?</FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Quantity Field */}
+        <FormField
+          control={form.control}
+          name="quantity"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Quantity ({field.value})</FormLabel>
+              <FormControl>
+                <Slider
+                  min={1}
+                  max={10}
+                  step={1}
+                  value={[field.value]}
+                  onValueChange={(vals) => field.onChange(vals[0])}
+                />
+              </FormControl>
+              <FormDescription>Adjust how many servings.</FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Submit Button */}
         <Button type="submit">Submit</Button>
       </form>
     </Form>
-  )
+  );
 }
-
-
-
-    
- 
