@@ -1,19 +1,7 @@
 import React, { useState, useEffect } from 'react';
-// import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-// import { Separator } from "@/components/ui/separator"
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
 const Home = () => {
-
-    // const [topDishes, setTopDishes] = useState([]);
-
-    // useEffect(() => {
-    //     const fetchDishes = async (req, res) => {
-    //         try {
-    //             const res = await fetch('/api/')
-    //         }
-
-    //     }
-    // })
 
     return ( 
         <div>
