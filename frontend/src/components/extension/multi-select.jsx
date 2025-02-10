@@ -36,6 +36,7 @@ const MultiSelector = ({
   className,
   children,
   dir,
+  getOptionLabel, // new prop
   ...props
 }) => {
   const [inputValue, setInputValue] = useState("");
@@ -58,14 +59,13 @@ const MultiSelector = ({
 
   const handleSelect = useCallback(
     (e) => {
-      // (Optional) This function can be used to track text selection,
-      // but it is not necessary for normal typing.
       e.preventDefault();
       const target = e.currentTarget;
       const selection = target.value.substring(
         target.selectionStart || 0,
         target.selectionEnd || 0
       );
+
       setSelectedValue(selection);
       setIsValueSelected(selection === inputValue);
     },
@@ -167,6 +167,7 @@ const MultiSelector = ({
         setActiveIndex,
         ref: inputRef,
         handleSelect,
+        getOptionLabel, // pass the function into context
       }}
     >
       <Command
@@ -186,9 +187,8 @@ const MultiSelector = ({
 
 const MultiSelectorTrigger = forwardRef(
   ({ className, children, ...props }, ref) => {
-    const { values, onValuesChange, activeIndex } = useMultiSelect();
+    const { values, onValuesChange, activeIndex, getOptionLabel } = useMultiSelect();
 
-    // Prevent input blur when clicking on a badge
     const handleMouseDown = useCallback((e) => {
       e.preventDefault();
     }, []);
@@ -210,7 +210,9 @@ const MultiSelectorTrigger = forwardRef(
               activeIndex === index && "ring-2"
             )}
           >
-            <span className="text-xs">{item}</span>
+            <span className="text-xs">
+              {getOptionLabel ? getOptionLabel(item) : item}
+            </span>
             <button
               aria-label={`Remove ${item} option`}
               type="button"
@@ -228,6 +230,8 @@ const MultiSelectorTrigger = forwardRef(
 );
 MultiSelectorTrigger.displayName = "MultiSelectorTrigger";
 
+// (The rest of the components remain unchanged)
+
 const MultiSelectorInput = forwardRef(({ className, ...props }, ref) => {
   const {
     setOpen,
@@ -244,7 +248,6 @@ const MultiSelectorInput = forwardRef(({ className, ...props }, ref) => {
       ref={inputRef}
       value={inputValue}
       onChange={(e) => setInputValue(e.target.value)}
-      // Removed onSelect for normal typing
       onBlur={() => setOpen(false)}
       onFocus={() => setOpen(true)}
       onClick={() => setActiveIndex(-1)}
@@ -283,7 +286,6 @@ const MultiSelectorItem = forwardRef(({ value, children, ...props }, ref) => {
   const { values, onValuesChange, setInputValue } = useMultiSelect();
   const isIncluded = values.includes(value);
 
-  // Prevent input blur when clicking on an item
   const handleMouseDown = useCallback((e) => {
     e.preventDefault();
     e.stopPropagation();

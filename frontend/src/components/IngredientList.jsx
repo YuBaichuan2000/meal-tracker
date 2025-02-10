@@ -1,5 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  CardFooter,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -9,11 +15,22 @@ export default function IngredientList() {
   const [tempName, setTempName] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
-  const pageSize = 9; 
+  const pageSize = 9;
 
-  // Fetch ingredients on mount
+  // Fetch ingredients on mount and when a new ingredient is created
   useEffect(() => {
     fetchIngredients();
+
+    // Listen for the custom event
+    const handleIngredientCreated = () => {
+      fetchIngredients();
+    };
+    window.addEventListener("ingredientCreated", handleIngredientCreated);
+
+    // Cleanup the event listener on unmount
+    return () => {
+      window.removeEventListener("ingredientCreated", handleIngredientCreated);
+    };
   }, []);
 
   async function fetchIngredients() {
@@ -28,15 +45,17 @@ export default function IngredientList() {
 
   // Calculate pagination
   const totalPages = Math.ceil(ingredients.length / pageSize);
-  const indexOfLastItem = currentPage * pageSize;           
-  const indexOfFirstItem = indexOfLastItem - pageSize;        
+  const indexOfLastItem = currentPage * pageSize;
+  const indexOfFirstItem = indexOfLastItem - pageSize;
   const currentIngredients = ingredients.slice(indexOfFirstItem, indexOfLastItem);
 
   // Delete ingredient
   async function handleDelete(ingredientId) {
     try {
       await fetch(`/api/ingredients/${ingredientId}`, { method: "DELETE" });
-      setIngredients((prev) => prev.filter((ing) => ing.ingredient_id !== ingredientId));
+      setIngredients((prev) =>
+        prev.filter((ing) => ing.ingredient_id !== ingredientId)
+      );
     } catch (error) {
       console.error("Error deleting ingredient:", error);
     }
@@ -59,7 +78,9 @@ export default function IngredientList() {
       if (res.ok) {
         setIngredients((prev) =>
           prev.map((ing) =>
-            ing.ingredient_id === ingredientId ? { ...ing, ingredient_name: tempName } : ing
+            ing.ingredient_id === ingredientId
+              ? { ...ing, ingredient_name: tempName }
+              : ing
           )
         );
         setEditingId(null);
@@ -124,7 +145,9 @@ export default function IngredientList() {
               <CardFooter className="flex flex-wrap gap-2">
                 {isEditing ? (
                   <>
-                    <Button onClick={() => handleEditSave(ing.ingredient_id)}>Save</Button>
+                    <Button onClick={() => handleEditSave(ing.ingredient_id)}>
+                      Save
+                    </Button>
                     <Button variant="secondary" onClick={handleEditCancel}>
                       Cancel
                     </Button>
@@ -154,7 +177,10 @@ export default function IngredientList() {
         <span>
           Page {currentPage} of {totalPages || 1}
         </span>
-        <Button onClick={handleNextPage} disabled={currentPage === totalPages || totalPages === 0}>
+        <Button
+          onClick={handleNextPage}
+          disabled={currentPage === totalPages || totalPages === 0}
+        >
           Next
         </Button>
       </div>

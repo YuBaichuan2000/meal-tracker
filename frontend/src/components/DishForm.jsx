@@ -68,18 +68,24 @@ export default function DishForm() {
   // 4) Submission logic
   async function onSubmit(values) {
     try {
+      // Transform the form values:
       const body = {
-        name: values.name,
-        ingredients: values.ingredients, // an array of ingredient IDs (as strings)
+        dishName: values.name, // rename "name" to "dishName"
+        // Map each selected ingredient id (which is a string) to an object with ingredient_id (as a number)
+        ingredients: values.ingredients.map((id) => ({
+          ingredient_id: parseInt(id, 10),
+          quantity: 1, 
+        })),
       };
-
-      const res = await fetch("/api/dish", {
+  
+      const res = await fetch("/api/dishes", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
-
+  
       if (res.ok) {
+        // For example, using a toast library or alert:
         alert("Dish created successfully");
         form.reset();
       } else {
@@ -132,6 +138,13 @@ export default function DishForm() {
                 onValuesChange={field.onChange}
                 loop
                 className="max-w-xs"
+                getOptionLabel={(val) => {
+                  // Look up the ingredient by matching the id (as a string)
+                  const ing = allIngredients.find(
+                    (i) => String(i.ingredient_id) === val
+                  );
+                  return ing ? ing.ingredient_name : val;
+                }}
               >
                 <MultiSelectorTrigger>
                   <MultiSelectorInput placeholder="Select ingredients" />

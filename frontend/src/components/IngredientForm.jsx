@@ -44,18 +44,16 @@ export default function IngredientForm() {
       });
 
       if (res.ok) {
-        // If you have a toast library:
-        // toast.success("Ingredient created successfully");
+        // If you have a toast library, you can replace alert with that.
         alert("Ingredient created successfully");
-        // Reset form to defaults
         form.reset();
+        // Dispatch a custom event so that IngredientList can re-fetch the list.
+        window.dispatchEvent(new Event("ingredientCreated"));
       } else {
-        // toast.error("Error creating ingredient");
         alert("Error creating ingredient");
       }
     } catch (error) {
       console.error("Error:", error);
-      // toast.error("Failed to submit. Please try again.");
       alert("Failed to submit. Please try again.");
     }
   }
@@ -82,7 +80,9 @@ export default function IngredientForm() {
                   {...field}
                 />
               </FormControl>
-              <FormDescription>Enter the name of the ingredient.</FormDescription>
+              <FormDescription>
+                Enter the name of the ingredient.
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
