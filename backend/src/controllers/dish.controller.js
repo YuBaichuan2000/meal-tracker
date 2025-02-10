@@ -1,13 +1,21 @@
 import prisma from "../prisma.js";
 
 const getDishes = async (req, res) => {
-  try {
-    const dishes = await prisma.dish.findMany();
-    res.json(dishes);
-  } catch (e) {
-    res.status(500).json({ error: "Error getting dishes" });
-  }
-};
+    try {
+      const dishes = await prisma.Dish.findMany({
+        include: {
+          dishIngredients: {
+            include: {
+              ingredient: true, // Include the related ingredient data
+            },
+          },
+        },
+      });
+      res.json(dishes);
+    } catch (e) {
+      res.status(500).json({ error: 'Error getting dishes' });
+    }
+  };
 
 const getDishById = async (req, res) => {
   const { id } = req.params;
