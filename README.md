@@ -20,3 +20,6 @@
 * Frontend: shadcn
 * Testing: unit & integration
 * Deployment
+
+## Future Work
+* Woolworth API
