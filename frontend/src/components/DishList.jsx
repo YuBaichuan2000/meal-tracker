@@ -27,17 +27,23 @@ const DishList = () => {
     }
   }
 
-  // Fetch dishes on mount and listen for dishCreated event
+  // Fetch dishes on mount and listen for dish events
   useEffect(() => {
     fetchDishes();
 
-    const handleDishCreated = () => {
+    const handleDishChange = () => {
       fetchDishes();
     };
 
-    window.addEventListener("dishCreated", handleDishCreated);
+    // Listen for all dish-related events
+    window.addEventListener("dishCreated", handleDishChange);
+    window.addEventListener("dishUpdated", handleDishChange);
+    window.addEventListener("dishDeleted", handleDishChange);
+
     return () => {
-      window.removeEventListener("dishCreated", handleDishCreated);
+      window.removeEventListener("dishCreated", handleDishChange);
+      window.removeEventListener("dishUpdated", handleDishChange);
+      window.removeEventListener("dishDeleted", handleDishChange);
     };
   }, []);
 
@@ -60,7 +66,8 @@ const DishList = () => {
   const handleDelete = async (dishId) => {
     try {
       await fetch(`/api/dishes/${dishId}`, { method: "DELETE" });
-      fetchDishes();
+      // Dispatch a custom event after deletion
+      window.dispatchEvent(new Event("dishDeleted"));
     } catch (error) {
       console.error("Error deleting dish:", error);
     }
@@ -96,7 +103,8 @@ const DishList = () => {
       if (res.ok) {
         setEditingDish(null);
         setTempDishName("");
-        fetchDishes();
+        // Dispatch a custom event after a successful update
+        window.dispatchEvent(new Event("dishUpdated"));
       } else {
         console.error("Error updating dish");
       }

@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import userRouter from './routes/user.routes.js';
 import ingredientRouter from './routes/ingredient.routes.js';
 import dishRouter from './routes/dish.routes.js';
+import menuRouter from './routes/menu.routes.js'
 
 dotenv.config();
 
@@ -16,6 +17,8 @@ app.use(express.json());
 app.use('/api/users', userRouter);
 app.use('/api/ingredients', ingredientRouter);
 app.use('/api/dishes', dishRouter);
+app.use('/api/menu', menuRouter);
+
 
 app.get('/', async(req, res) => {
     res.send("Welcome to meal tracker api");

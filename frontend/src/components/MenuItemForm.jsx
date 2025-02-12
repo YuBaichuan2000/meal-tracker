@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+// import { toast } from "sonner"; // Ensure you have a toast library installed
 
 import { Button } from "@/components/ui/button";
 import {
@@ -15,7 +16,13 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 
 // 1) Define your Zod schema for the form fields
@@ -35,6 +42,7 @@ const formSchema = z.object({
 });
 
 export default function MenuItemForm() {
+  // State to hold the list of dishes for the select dropdown
   const [dishes, setDishes] = useState([]);
 
   // 2) Create the React Hook Form instance, using Zod as a resolver
@@ -52,7 +60,7 @@ export default function MenuItemForm() {
   useEffect(() => {
     async function fetchDishes() {
       try {
-        const res = await fetch("/api/dish");
+        const res = await fetch("/api/dishes");
         const data = await res.json();
         setDishes(data);
       } catch (error) {
@@ -62,12 +70,12 @@ export default function MenuItemForm() {
     fetchDishes();
   }, []);
 
-  // 4) Submission handler (Zod validation + async fetch to create menu item)
+  // 4) Submission handler (Zod validation + async fetch to create a menu item)
   async function onSubmit(values) {
     try {
       console.log("Form values:", values);
       const body = {
-        user_id: 1, // or get from context if you have auth
+        user_id: 1, // Replace this with the actual user ID from your auth context, if available
         dish_id: values.dish_id,
         day_of_week: values.day_of_week,
         label: values.label,
@@ -80,12 +88,16 @@ export default function MenuItemForm() {
         body: JSON.stringify(body),
       });
 
+      const json = await res.json();
+
       if (res.ok) {
-        toast.success("Menu item created successfully");
-        // reset form to defaults
+        // toast.success("Menu item created successfully");
+        // Reset form to defaults after successful submission
         form.reset();
       } else {
-        toast.error("Error creating menu item");
+        // toast.error("Error creating menu item: " + json.error);
+        console.log("Error creating menu item");
+
       }
     } catch (error) {
       console.error("Error:", error);
@@ -118,7 +130,10 @@ export default function MenuItemForm() {
                   </SelectTrigger>
                   <SelectContent>
                     {dishes.map((dish) => (
-                      <SelectItem key={dish.dish_id} value={String(dish.dish_id)}>
+                      <SelectItem
+                        key={dish.dish_id}
+                        value={String(dish.dish_id)}
+                      >
                         {dish.dish_name}
                       </SelectItem>
                     ))}
@@ -144,7 +159,15 @@ export default function MenuItemForm() {
                     <SelectValue placeholder="Select day" />
                   </SelectTrigger>
                   <SelectContent>
-                    {["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"].map((day) => (
+                    {[
+                      "Monday",
+                      "Tuesday",
+                      "Wednesday",
+                      "Thursday",
+                      "Friday",
+                      "Saturday",
+                      "Sunday",
+                    ].map((day) => (
                       <SelectItem key={day} value={day}>
                         {day}
                       </SelectItem>

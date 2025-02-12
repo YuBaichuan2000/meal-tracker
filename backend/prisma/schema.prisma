@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -14,15 +8,6 @@ datasource db {
 }
 
 // ----------------- Models ----------------- //
-model User {
-  user_id    Int      @id @default(autoincrement())
-  username   String
-  email      String   @unique
-  password   String
-  created_at DateTime @default(now())
-
-  menuItems  MenuItem[]
-}
 
 model Dish {
   dish_id    Int      @id @default(autoincrement())
@@ -57,14 +42,14 @@ model DishIngredients {
 
 model MenuItem {
   menu_item_id Int      @id @default(autoincrement())
-  user_id      Int
+  // Removed user_id field and relation
   dish_id      Int
   quantity     Float    @default(1)
   label        Label?
   day_of_week  DayOfWeek
   created_at   DateTime @default(now())
 
-  user User @relation(fields: [user_id], references: [user_id])
+  // Only include relation to Dish now
   dish Dish @relation(fields: [dish_id], references: [dish_id])
 }
 
