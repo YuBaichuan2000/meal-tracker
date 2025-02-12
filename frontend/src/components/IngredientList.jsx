@@ -52,12 +52,23 @@ export default function IngredientList() {
   // Delete ingredient
   async function handleDelete(ingredientId) {
     try {
-      await fetch(`/api/ingredients/${ingredientId}`, { method: "DELETE" });
+      const res = await fetch(`/api/ingredients/${ingredientId}`, { method: "DELETE" });
+      
+      // Log the response status for debugging
+      console.log("Delete response status:", res.status);
+  
+      if (!res.ok) {
+        const errorData = await res.json();
+        console.error("Error deleting ingredient:", errorData);
+        throw new Error("Failed to delete ingredient");
+      }
+      
+      // If deletion was successful, update local state.
       setIngredients((prev) =>
         prev.filter((ing) => ing.ingredient_id !== ingredientId)
       );
     } catch (error) {
-      console.error("Error deleting ingredient:", error);
+      console.error("Error in handleDelete:", error);
     }
   }
 

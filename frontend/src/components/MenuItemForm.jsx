@@ -27,7 +27,10 @@ import { Slider } from "@/components/ui/slider";
 
 // 1) Define your Zod schema for the form fields
 const formSchema = z.object({
-  dish_id: z.coerce.number().min(1, "Please select a valid dish"),
+  dish_id: z.preprocess(
+    (val) => (typeof val === "string" ? Number(val) : val),
+    z.number().min(1, "Please select a valid dish")
+  ),
   day_of_week: z.enum([
     "Monday",
     "Tuesday",
@@ -49,7 +52,7 @@ export default function MenuItemForm() {
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      dish_id: 0,
+      dish_id: null,
       day_of_week: "Monday",
       label: "Lunch",
       quantity: 1,
