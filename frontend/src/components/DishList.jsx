@@ -27,23 +27,24 @@ const DishList = () => {
     }
   }
 
-  // Fetch dishes on mount and listen for dish events
+  // Fetch dishes on mount and listen for dish events (if needed for other actions)
   useEffect(() => {
     fetchDishes();
 
+    // Optional: Listen for other dish-related events if used elsewhere.
     const handleDishChange = () => {
       fetchDishes();
     };
 
-    // Listen for all dish-related events
     window.addEventListener("dishCreated", handleDishChange);
     window.addEventListener("dishUpdated", handleDishChange);
-    window.addEventListener("dishDeleted", handleDishChange);
+    // If you prefer, you can remove the dishDeleted listener since we update directly after deletion.
+    // window.addEventListener("dishDeleted", handleDishChange);
 
     return () => {
       window.removeEventListener("dishCreated", handleDishChange);
       window.removeEventListener("dishUpdated", handleDishChange);
-      window.removeEventListener("dishDeleted", handleDishChange);
+      // window.removeEventListener("dishDeleted", handleDishChange);
     };
   }, []);
 
@@ -62,12 +63,18 @@ const DishList = () => {
     if (currentPage < totalPages) setCurrentPage((prev) => prev + 1);
   };
 
-  // Delete dish handler
+  // Revised Delete dish handler
   const handleDelete = async (dishId) => {
     try {
-      await fetch(`/api/dishes/${dishId}`, { method: "DELETE" });
-      // Dispatch a custom event after deletion
-      window.dispatchEvent(new Event("dishDeleted"));
+      const res = await fetch(`/api/dishes/${dishId}`, { method: "DELETE" });
+      if (res.ok) {
+        // Instead of dispatching an event, re-fetch the list directly.
+        fetchDishes();
+        // Alternatively, you could update state locally:
+        // setDishes((prev) => prev.filter((dish) => dish.dish_id !== dishId));
+      } else {
+        console.error("Error deleting dish:", res.statusText);
+      }
     } catch (error) {
       console.error("Error deleting dish:", error);
     }
@@ -85,7 +92,6 @@ const DishList = () => {
 
     try {
       // Prepare updated ingredients from the existing dish.
-      // (We send the current dishIngredients so they aren't lost on update.)
       const updatedIngredients = editingDish.dishIngredients.map((di) => ({
         ingredient_id: di.ingredient_id,
         quantity: di.quantity,
@@ -103,8 +109,7 @@ const DishList = () => {
       if (res.ok) {
         setEditingDish(null);
         setTempDishName("");
-        // Dispatch a custom event after a successful update
-        window.dispatchEvent(new Event("dishUpdated"));
+        fetchDishes();
       } else {
         console.error("Error updating dish");
       }
